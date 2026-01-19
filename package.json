@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:plugin": "tsc -p browser-plugin/tsconfig.json && cp browser-plugin/manifest.json browser-plugin/dist/ && cp browser-plugin/popup.html browser-plugin/dist/ && cp browser-plugin/popup.css browser-plugin/dist/ && cp browser-plugin/contentStyles.css browser-plugin/dist/ && mkdir -p browser-plugin/dist/icons && cp -r browser-plugin/icons/* browser-plugin/dist/icons/",
     "start": "next start",
     "lint": "eslint"
   },
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/chrome": "^0.1.34",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

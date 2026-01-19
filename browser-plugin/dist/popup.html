@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Outmarket Admin</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen">
+      <h1>Admin Login</h1>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="admin@example.com">
+      </div>
+      <div class="field">
+        <label>PIN</label>
+        <input type="password" id="pin" placeholder="Enter PIN">
+      </div>
+      <button id="login-btn">Login</button>
+      <div id="login-error" class="error"></div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboard-screen" class="screen hidden">
+      <div class="header">
+        <h1>Customers</h1>
+        <button id="logout-btn" class="secondary">Logout</button>
+      </div>
+      
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Search by email...">
+      </div>
+
+      <div id="customer-list" class="customer-list">
+        <!-- List items will be injected here -->
+      </div>
+      
+      <div id="status-msg"></div>
+    </div>
+  </div>
+  <script src="./popup/main.js" type="module"></script>
+</body>
+</html>

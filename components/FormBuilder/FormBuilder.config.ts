@@ -4,10 +4,22 @@ const config: FormConfig = {
   "title": "User Profile Form",
   "fields": [
     {
-      "id": "fullName",
-      "label": "Full Name",
+      "id": "firstName",
+      "label": "First Name",
       "type": "text",
-      "placeholder": "Enter your full name"
+      "placeholder": "Enter your first name"
+    },
+    {
+      "id": "middleName",
+      "label": "Middle Name",
+      "type": "text",
+      "placeholder": "Enter your middle name"
+    },
+    {
+      "id": "lastName",
+      "label": "Last Name",
+      "type": "text",
+      "placeholder": "Enter your last name"
     },
     {
       "id": "gender",
@@ -23,6 +35,12 @@ const config: FormConfig = {
       "id": "birthDate",
       "label": "Date of Birth",
       "type": "date"
+    },
+    {
+      "id": "amount",
+      "label": "Amount",
+      "type": "number",
+      "placeholder": "Insurance Amount"
     },
     {
       "id": "age",

@@ -107,7 +107,7 @@ export async function POST(request: Request) {
       path: "/",
     });
 
-    return NextResponse.json({ success: true, message: "Logged in successfully" });
+    return NextResponse.json({ success: true, message: "Logged in successfully", id: admin.id, role: role });
   } catch (error) {
     console.error("Login API error:", error);
     return NextResponse.json(
