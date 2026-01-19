@@ -30,7 +30,11 @@ export const useLoginController = () => {
 
       if (response.ok) {
         console.log("Login successful:", result);
-        router.push("/dashboard");
+        if (result.role === "customer") {
+          router.push(`/form/${result.id}`);
+        } else {
+          router.push("/dashboard");
+        }
       } else {
         console.error("Login failed:", result.error);
         // You could set a form error here if you wanted

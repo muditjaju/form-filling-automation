@@ -8,9 +8,13 @@ export function proxy(request: NextRequest) {
   if (pathname === "/") {
     const role = request.cookies.get("ROLE")?.value;
     const pin = request.cookies.get("PIN")?.value;
+    const id = request.cookies.get("ID")?.value;
 
-    // If both ROLE and PIN exist, redirect to /dashboard
+    // If both ROLE and PIN exist
     if (role && pin) {
+      if (role === "customer") {
+        return NextResponse.redirect(new URL(`/form/${id}`, request.url));
+      }
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
