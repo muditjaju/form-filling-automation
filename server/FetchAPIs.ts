@@ -52,5 +52,26 @@ export const FetchAPIs = {
     }
 
     return { success: true, data };
+  },
+
+  /**
+   * Fetches the mapping data for a specific form URL from website-form-mappings table.
+   */
+  async getFormMapping(url: string) {
+    const { data, error } = await supabase
+      .from("website-form-mappings")
+      .select("*")
+      .eq("form_link", url)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') { // No rows found
+        return { success: true, data: null };
+      }
+      console.error("Error fetching form mapping:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
   }
 };

@@ -1,9 +1,0 @@
-{
-  "mappings": {
-    "given-name": ["firstName", "middleName"],
-    "last-name": ["lastName"],
-    "insurance-amount": ["amount"],
-    "address": ["addresses.street", "addresses.city"],
-    "zip-code": []
-  }
-}

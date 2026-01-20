@@ -4,20 +4,11 @@
  */
 class OverlayController {
   private customerData: any;
+  private mapping: any;
   
-  // Fake mapping object as requested
-  private mapping = {
-    "mappings": {
-      "given-name": ["firstName", "middleName"],
-      "last-name": ["lastName"],
-      "insurance-amount": ["amount"],
-      "address": ["addresses.street", "addresses.city"],
-      "zip-code": []
-    }
-  };
-
-  constructor(customerData: any) {
+  constructor(customerData: any, mappingData: any) {
     this.customerData = customerData.data;
+    this.mapping = mappingData;
   }
 
   /**
@@ -122,26 +113,44 @@ class OverlayController {
   }
 }
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   if (request.action === 'showOverlay') {
-    createOverlay(request.data);
+    await createOverlay(request.data);
   }
 });
 
-function createOverlay(data: any) {
+const API_BASE_URL = 'http://localhost:3000/api';
+
+async function createOverlay(data: any) {
   const existing = document.getElementById('outmarket-overlay');
   if (existing) existing.remove();
 
-  const controller = new OverlayController(data);
+  // Fetch mapping data for the current URL
+  let mappingData = null;
+  try {
+    const currentUrl = window.location.href;
+    const response = await fetch(`${API_BASE_URL}/form-mapping?url=${encodeURIComponent(currentUrl)}`);
+    const result = await response.json();
+    if (result.success && result.data) {
+      mappingData = result.data.mapping_data;
+      console.log('[OutMarket] Found mapping data:', mappingData);
+    }
+  } catch (error) {
+    console.error('[OutMarket] Failed to fetch mapping data:', error);
+  }
+
+  const controller = new OverlayController(data, mappingData);
 
   const overlay = document.createElement('div');
   overlay.id = 'outmarket-overlay';
   
+  const showFillBtn = !!mappingData;
+
   overlay.innerHTML = `
     <div class="om-header" id="om-drag-handle">
       <div class="om-header-left">
         <span>Customer Data</span>
-        <button id="om-fill-btn">Fill Automatically</button>
+        ${showFillBtn ? '<button id="om-fill-btn">Fill Automatically</button>' : ''}
       </div>
       <button id="om-close-btn">✕</button>
     </div>
@@ -208,9 +217,12 @@ function createOverlay(data: any) {
   document.body.appendChild(overlay);
 
   // Auto-fill Logic
-  overlay.querySelector('#om-fill-btn')!.addEventListener('click', () => {
-    controller.autoFill();
-  });
+  const fillBtn = overlay.querySelector('#om-fill-btn');
+  if (fillBtn) {
+    fillBtn.addEventListener('click', () => {
+      controller.autoFill();
+    });
+  }
 
   // Close Logic
   overlay.querySelector('#om-close-btn')!.addEventListener('click', () => overlay.remove());
