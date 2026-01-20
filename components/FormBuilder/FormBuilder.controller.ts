@@ -23,6 +23,13 @@ export const useFormBuilder = (config: FormConfig, initialData: FormData = {}) =
     setFormData((prev) => initializeData(config.fields, prev));
   }, [config.fields]);
 
+  // Sync with initialData if it changes from outside
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
+
   const handleChange = useCallback((id: string, value: any) => {
     setFormData((prev) => ({
       ...prev,

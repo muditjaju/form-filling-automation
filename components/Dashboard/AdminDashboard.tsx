@@ -17,18 +17,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ pin, adminId }) 
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
-  const fetchLeads = async () => {
-    setIsLoading(true);
+  const fetchLeads = async (silent = false) => {
+    if (!silent) setIsLoading(true);
     try {
       const response = await fetch(`/api/customers?admin_id=${adminId}`);
       const result = await response.json();
       if (result.success) {
         setLeads(result.data);
+        
+        // Update selected lead if it exists to keep overlay data in sync
+        if (selectedLead) {
+          const updatedLead = result.data.find((l: any) => l.id === selectedLead.id);
+          if (updatedLead) {
+            setSelectedLead(updatedLead);
+          }
+        }
       }
     } catch (error) {
       console.error("Failed to fetch leads:", error);
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
   };
 
@@ -58,7 +66,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ pin, adminId }) 
             <Button 
                 variant="outline" 
                 size="icon" 
-                onClick={fetchLeads} 
+                onClick={() => fetchLeads()} 
                 disabled={isLoading}
                 className="h-12 w-12 rounded-2xl border-zinc-200 dark:border-zinc-800"
             >
@@ -93,6 +101,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ pin, adminId }) 
         lead={selectedLead} 
         isOpen={isOverlayOpen} 
         onClose={() => setIsOverlayOpen(false)} 
+        onUpdate={() => fetchLeads(true)}
       />
     </div>
   );

@@ -23,9 +23,10 @@ interface LeadOverlayProps {
   lead: Lead | null;
   isOpen: boolean;
   onClose: () => void;
+  onUpdate?: () => void;
 }
 
-export const LeadOverlay: React.FC<LeadOverlayProps> = ({ lead, isOpen, onClose }) => {
+export const LeadOverlay: React.FC<LeadOverlayProps> = ({ lead, isOpen, onClose, onUpdate }) => {
   if (!lead) return null;
 
   const handleSubmit = async (data: any) => {
@@ -44,6 +45,9 @@ export const LeadOverlay: React.FC<LeadOverlayProps> = ({ lead, isOpen, onClose 
       }
 
       Toast.createNewToast({ message: 'Lead updated successfully!', type: 'success', id: loadingToast });
+      if (onUpdate) {
+        onUpdate();
+      }
     } catch (error) {
       console.error('Submission error:', error);
       Toast.createNewToast({ 
