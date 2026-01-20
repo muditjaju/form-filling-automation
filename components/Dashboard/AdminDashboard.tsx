@@ -4,18 +4,22 @@ import React, { useEffect, useState } from "react";
 import { Settings, Users, BarChart3, ShieldCheck, ArrowUpRight, ArrowDownRight, RefreshCw } from "lucide-react";
 import { AllLeadsTable } from "../AllLeadsTable";
 import { LeadOverlay } from "../LeadOverlay";
+import { CreateLeadOverlay } from "./CreateLeadOverlay";
 import { Button } from "../ui/button";
+import { Plus } from "lucide-react";
 
 interface AdminDashboardProps {
   pin: string;
   adminId: string;
+  adminEmail: string;
 }
 
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({ pin, adminId }) => {
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ pin, adminId, adminEmail }) => {
   const [leads, setLeads] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+  const [isCreateOverlayOpen, setIsCreateOverlayOpen] = useState(false);
 
   const fetchLeads = async (silent = false) => {
     if (!silent) setIsLoading(true);
@@ -51,6 +55,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ pin, adminId }) 
     setIsOverlayOpen(true);
   };
 
+  const handleCreateSuccess = (newLead: any) => {
+    fetchLeads(true);
+    setSelectedLead(newLead);
+    setIsOverlayOpen(true);
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex items-center justify-between">
@@ -63,6 +73,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ pin, adminId }) 
           </p>
         </div>
         <div className="flex items-center space-x-3">
+            <Button
+                onClick={() => setIsCreateOverlayOpen(true)}
+                className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-200 dark:shadow-none transition-all active:scale-95 flex items-center gap-2"
+            >
+                <Plus className="h-5 w-5" />
+                <span>Create New Form</span>
+            </Button>
             <Button 
                 variant="outline" 
                 size="icon" 
@@ -102,6 +119,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ pin, adminId }) 
         isOpen={isOverlayOpen} 
         onClose={() => setIsOverlayOpen(false)} 
         onUpdate={() => fetchLeads(true)}
+      />
+
+      <CreateLeadOverlay 
+        isOpen={isCreateOverlayOpen}
+        onClose={() => setIsCreateOverlayOpen(false)}
+        adminEmail={adminEmail}
+        adminId={adminId}
+        onSuccess={handleCreateSuccess}
       />
     </div>
   );
