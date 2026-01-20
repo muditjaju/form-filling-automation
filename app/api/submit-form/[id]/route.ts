@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/server/supabase/client";
 import { cookies } from "next/headers";
+import { FetchAPIs } from "@/server/FetchAPIs";
 
 export async function POST(
   request: Request,
@@ -11,6 +12,9 @@ export async function POST(
     const body = await request.json();
     const cookieStore = await cookies();
     const role = cookieStore.get("ROLE")?.value;
+    
+    const adminEmail = cookieStore.get("EMAIL")?.value;
+    const adminPin = cookieStore.get("PIN")?.value;
     
     // Extract data and pin from body
     // We expect the body to have form fields, and optionally a 'pin' field if it's a customer submission
@@ -30,8 +34,22 @@ export async function POST(
     const isAdmin = role?.toLowerCase() === "admin";
 
     if (isAdmin) {
-      // TODO: Make sure admin is correct/authorized
-      // For now, we update based on form id
+      // 1. Verify Admin credentials
+      if (!adminEmail || !adminPin) {
+        return NextResponse.json(
+          { success: false, error: "Admin email or PIN missing" },
+          { status: 401 }
+        );
+      }
+      const adminResult = await FetchAPIs.loginAdmin(adminEmail, adminPin);
+      
+      if (!adminResult.success || !adminResult.data) {
+        return NextResponse.json(
+          { success: false, error: "Invalid Admin email or PIN" },
+              { status: 401 }
+            );
+          }
+          
     } else {
       // For customers, we must match both ID and PIN
       if (!pin) {

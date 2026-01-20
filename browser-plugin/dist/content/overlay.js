@@ -1,6 +1,7 @@
 "use strict";
 // import { API_BASE_URL } from "@/popup/api";
 const API_BASE_URL = 'https://form-filling-automation.vercel.app/api';
+// const API_BASE_URL = 'http://localhost:3000/api';
 /**
  * Controller for the OutMarket Overlay
  * Handles data mapping and auto-filling web forms
@@ -15,11 +16,30 @@ class OverlayController {
         this.mapping = mappingData;
     }
     /**
+     * Recursively finds all form elements in the current document and accessible iframes
+     */
+    getAllForms(doc = document) {
+        let forms = Array.from(doc.querySelectorAll('form'));
+        const iframes = doc.querySelectorAll('iframe');
+        iframes.forEach(iframe => {
+            try {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+                if (iframeDoc) {
+                    forms = forms.concat(this.getAllForms(iframeDoc));
+                }
+            }
+            catch (e) {
+                // Cross-origin iframe, ignore
+                console.warn('[OutMarket] Could not access iframe for forms:', e);
+            }
+        });
+        return forms;
+    }
+    /**
      * Fills the page using AI by sending the DOM and customer data to the LLM
      */
     async fillUsingAI() {
         console.log('[OutMarket] Starting AI-based fill');
-        // Show a loading state if possible, for now just an alert/log
         const aiBtn = document.getElementById('om-ai-fill-btn');
         const originalText = aiBtn?.textContent;
         if (aiBtn) {
@@ -27,20 +47,43 @@ class OverlayController {
             aiBtn.textContent = 'Analyzing...';
         }
         try {
-            const response = await fetch(`${API_BASE_URL}/llm-based-mapper`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    htmlString: document.body.innerHTML,
-                    customerData: this.rawCustomerData
-                }),
-            });
-            if (!response.ok) {
-                throw new Error(`API Error: ${response.statusText}`);
+            // Find all forms on the page (including iframes)
+            const forms = this.getAllForms();
+            let htmlToSend = '';
+            if (forms.length > 0) {
+                console.log(`[OutMarket] Found ${forms.length} forms (including iframes). Sending form HTML only.`);
+                htmlToSend = forms.map(form => form.outerHTML).join('\n');
+                console.log('html being sent', htmlToSend);
             }
-            const mapping = await response.json();
+            else {
+                console.log('[OutMarket] No forms found. Sending pruned body HTML.');
+                // Clone the body to remove the overlay before sending to AI
+                const bodyClone = document.body.cloneNode(true);
+                const overlayInClone = bodyClone.querySelector('#outmarket-overlay');
+                if (overlayInClone)
+                    overlayInClone.remove();
+                htmlToSend = bodyClone.innerHTML;
+            }
+            const response = await new Promise((resolve) => {
+                chrome.runtime.sendMessage({
+                    action: 'proxyFetch',
+                    url: `${API_BASE_URL}/llm-based-mapper`,
+                    options: {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            htmlString: htmlToSend,
+                            customerData: this.rawCustomerData
+                        }),
+                    }
+                }, resolve);
+            });
+            if (!response || !response.success) {
+                throw new Error(response?.error || 'Failed to get response from AI');
+            }
+            const mapping = response.data;
             console.log('[OutMarket] AI Mapping result:', mapping);
             let filledCount = 0;
             for (const [id, value] of Object.entries(mapping)) {
@@ -64,23 +107,38 @@ class OverlayController {
     /**
      * Helper to set a value on an HTML element and trigger events
      */
-    setElementValue(id, value) {
-        const element = document.getElementById(id);
-        if (!element || !(element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement)) {
+    setElementValue(id, value, doc = document) {
+        let element = doc.getElementById(id);
+        // If not found in current doc, look into same-origin iframes
+        if (!element) {
+            const iframes = doc.querySelectorAll('iframe');
+            for (const iframe of Array.from(iframes)) {
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+                    if (iframeDoc) {
+                        const found = this.setElementValue(id, value, iframeDoc);
+                        if (found)
+                            return true;
+                    }
+                }
+                catch (e) {
+                    // Ignore accessible errors
+                }
+            }
+        }
+        if (!element)
+            return false;
+        const tagName = element.tagName.toLowerCase();
+        const isField = tagName === 'input' || tagName === 'textarea' || tagName === 'select';
+        if (!isField) {
             return false;
         }
-        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
-        const nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value")?.set;
-        const nativeSelectValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value")?.set;
         try {
-            if (element instanceof HTMLInputElement && nativeInputValueSetter) {
-                nativeInputValueSetter.call(element, value);
-            }
-            else if (element instanceof HTMLTextAreaElement && nativeTextAreaValueSetter) {
-                nativeTextAreaValueSetter.call(element, value);
-            }
-            else if (element instanceof HTMLSelectElement && nativeSelectValueSetter) {
-                nativeSelectValueSetter.call(element, value);
+            // Use the setter from the element's actual prototype to bypass React overrides
+            // and ensure cross-frame compatibility.
+            const setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(element), 'value')?.set;
+            if (setter) {
+                setter.call(element, value);
             }
             else {
                 element.value = value;
@@ -158,11 +216,19 @@ async function createOverlay(data) {
     let mappingData = null;
     try {
         const currentUrl = window.location.href;
-        const response = await fetch(`${API_BASE_URL}/form-mapping?url=${encodeURIComponent(currentUrl)}`);
-        const result = await response.json();
-        if (result.success && result.data) {
-            mappingData = result.data.mapping_data;
-            console.log('[OutMarket] Found mapping data:', mappingData);
+        const response = await new Promise((resolve) => {
+            chrome.runtime.sendMessage({
+                action: 'proxyFetch',
+                url: `${API_BASE_URL}/form-mapping?url=${encodeURIComponent(currentUrl)}`
+            }, resolve);
+        });
+        if (response && response.success && response.data) {
+            // Handle both wrapped { success, data: { mapping_data } } and direct { mapping_data } responses
+            const apiResponse = response.data;
+            mappingData = apiResponse.mapping_data || apiResponse.data?.mapping_data;
+            if (mappingData) {
+                console.log('[OutMarket] Found mapping data:', mappingData);
+            }
         }
     }
     catch (error) {
@@ -171,7 +237,6 @@ async function createOverlay(data) {
     const controller = new OverlayController(data, mappingData);
     const overlay = document.createElement('div');
     overlay.id = 'outmarket-overlay';
-    const showFillBtn = !!mappingData;
     overlay.innerHTML = `
     <div class="om-header" id="om-drag-handle">
       <div class="om-header-left">
