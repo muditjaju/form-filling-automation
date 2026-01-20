@@ -1,12 +1,11 @@
 import React from "react";
-import { User, ShoppingBag, Clock, Star } from "lucide-react";
+import { User } from "lucide-react";
+import { CustomerDashboardProps } from "./CustomerDashboard.type";
+import { useCustomerDashboard } from "./CustomerDashboard.controller";
 
-interface CustomerDashboardProps {
-  pin: string;
-  id: string;
-}
+export const CustomerDashboard: React.FC<CustomerDashboardProps> = (props) => {
+  const {} = useCustomerDashboard(props);
 
-export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ pin, id }) => {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex items-center justify-between">
@@ -22,8 +21,6 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ pin, id })
           <User className="h-6 w-6" />
         </div>
       </div>
-
-      
     </div>
   );
 };

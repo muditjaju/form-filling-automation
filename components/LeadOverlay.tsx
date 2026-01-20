@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormBuilder } from "@/components/FormBuilder/FormBuilder.ui";
 import config from "@/components/FormBuilder/FormBuilder.config";
 import { Toast } from "@/components/ui/Toast/Toast";
-import { PDFManager } from "./Dashboard/PDFManager";
+import { PDFManager } from "./Dashboard/PDFManager/PDFManager.view";
 import { CustomerDataTableType } from "@/types/CustomerDataTable.type";
 
 interface LeadOverlayProps {

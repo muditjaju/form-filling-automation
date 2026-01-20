@@ -1,5 +1,5 @@
-import { AdminDashboard } from "@/components/Dashboard/AdminDashboard";
-import { LogoutButton } from "@/components/Dashboard/LogoutButton";
+import { AdminDashboard } from "@/components/Dashboard/AdminDashboard/AdminDashboard.view";
+import { LogoutButton } from "@/components/Dashboard/LogoutButton/LogoutButton.view";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 

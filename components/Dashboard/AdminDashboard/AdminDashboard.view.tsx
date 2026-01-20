@@ -1,65 +1,28 @@
 'use client';
 
 import { Plus, RefreshCw, ShieldCheck } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { AllLeadsTable } from "../AllLeadsTable";
-import { LeadOverlay } from "../LeadOverlay";
-import { Button } from "../ui/button";
-import { CreateLeadOverlay } from "./CreateLeadOverlay";
-import { FormData } from "../FormBuilder/FormBuilder.type";
-import { CustomerDataTableType } from "@/types/CustomerDataTable.type";
+import React from "react";
 
-interface AdminDashboardProps {
-  adminId: string;
-  adminEmail: string;
-}
+import { CreateLeadOverlay } from "../CreateLeadOverlay/CreateLeadOverlay.view";
+import { AdminDashboardProps } from "./AdminDashboard.type";
+import { useAdminDashboard } from "./AdminDashboard.controller";
+import { LeadOverlay } from "@/components/LeadOverlay";
+import { AllLeadsTable } from "@/components/AllLeadsTable";
+import { Button } from "@/components/ui/button";
 
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, adminEmail }) => {
-  const [leads, setLeads] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedLead, setSelectedLead] = useState<CustomerDataTableType | null>(null);
-  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
-  const [isCreateOverlayOpen, setIsCreateOverlayOpen] = useState(false);
-
-  const fetchLeads = async (silent = false) => {
-    if (!silent) setIsLoading(true);
-    try {
-      const response = await fetch(`/api/customers?admin_id=${adminId}`);
-      const result = await response.json();
-      if (result.success) {
-        setLeads(result.data);
-        
-        // Update selected lead if it exists to keep overlay data in sync
-        if (selectedLead) {
-          const updatedLead = result.data.find((l: CustomerDataTableType) => l.id === selectedLead.id);
-          if (updatedLead) {
-            setSelectedLead(updatedLead);
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch leads:", error);
-    } finally {
-      if (!silent) setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (adminId) {
-      fetchLeads();
-    }
-  }, [adminId]);
-
-  const handleLeadClick = (lead: CustomerDataTableType) => {
-    setSelectedLead(lead);
-    setIsOverlayOpen(true);
-  };
-
-  const handleCreateSuccess = (newLead: CustomerDataTableType) => {
-    fetchLeads(true);
-    setSelectedLead(newLead);
-    setIsOverlayOpen(true);
-  };
+export const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
+  const {
+    leads,
+    isLoading,
+    selectedLead,
+    isOverlayOpen,
+    isCreateOverlayOpen,
+    fetchLeads,
+    handleLeadClick,
+    handleCreateSuccess,
+    setIsOverlayOpen,
+    setIsCreateOverlayOpen,
+  } = useAdminDashboard(props);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -124,11 +87,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, adminEm
       <CreateLeadOverlay 
         isOpen={isCreateOverlayOpen}
         onClose={() => setIsCreateOverlayOpen(false)}
-        adminEmail={adminEmail}
-        adminId={adminId}
+        adminEmail={props.adminEmail}
+        adminId={props.adminId}
         onSuccess={handleCreateSuccess}
       />
     </div>
   );
 };
-
