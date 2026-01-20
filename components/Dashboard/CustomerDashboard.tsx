@@ -3,9 +3,10 @@ import { User, ShoppingBag, Clock, Star } from "lucide-react";
 
 interface CustomerDashboardProps {
   pin: string;
+  id: string;
 }
 
-export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ pin }) => {
+export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({ pin, id }) => {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex items-center justify-between">
