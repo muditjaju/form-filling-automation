@@ -1,28 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
-import { FileText, ChevronRight, Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { pdfTemplates } from '@/lib/pdf-mappings';
-import { PDFOverlay } from './PDFOverlay';
-
-interface PDFManagerProps {
-  lead: any;
-}
+import { ChevronRight, FileText, Search } from 'lucide-react';
+import React from 'react';
+import { PDFOverlay } from '../PDFOverlay/PDFOverlay.view';
+import { PDFManagerProps } from './PDFManager.type';
+import { usePDFManager } from './PDFManager.controller';
 
 export const PDFManager: React.FC<PDFManagerProps> = ({ lead }) => {
-  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
-  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredTemplates = pdfTemplates.filter(template => 
-    template.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleOpenPdf = (template: any) => {
-    setSelectedTemplate(template);
-    setIsOverlayOpen(true);
-  };
+  const {
+    selectedTemplate,
+    isOverlayOpen,
+    setIsOverlayOpen,
+    searchQuery,
+    setSearchQuery,
+    filteredTemplates,
+    handleOpenPdf,
+  } = usePDFManager();
 
   return (
     <div className="space-y-6">

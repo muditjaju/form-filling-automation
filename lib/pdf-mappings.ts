@@ -18,7 +18,7 @@ const getDemoMapping = (data: FormData): PDFMapping => ({
 /**
  * Dispatcher: Add new insurance companies here
  */
-export const getMappingForPdf = (pdfId: string, data: any): PDFMapping => {
+export const getMappingForPdf = (pdfId: string, data: FormData): PDFMapping => {
   switch (pdfId) {
     case 'demo-pdf': return getDemoMapping(data);
     default: return {};

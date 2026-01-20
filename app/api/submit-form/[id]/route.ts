@@ -11,7 +11,12 @@ export async function POST(
     const body = await request.json();
     const cookieStore = await cookies();
     const role = cookieStore.get("ROLE")?.value;
-    const pin = cookieStore.get("PIN")?.value;
+    
+    // Extract data and pin from body
+    // We expect the body to have form fields, and optionally a 'pin' field if it's a customer submission
+    const { pin: bodyPin, ...formData } = body;
+    const sessionPin = cookieStore.get("PIN")?.value;
+    const pin = bodyPin || sessionPin;
 
     if (!id) {
       return NextResponse.json(
@@ -20,7 +25,7 @@ export async function POST(
       );
     }
 
-    let query = supabase.from("customer-data").update({ data: body }).eq("id", id);
+    let query = supabase.from("customer-data").update({ data: formData }).eq("id", id);
 
     const isAdmin = role?.toLowerCase() === "admin";
 

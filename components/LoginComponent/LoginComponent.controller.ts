@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginFormData } from "./LoginComponent.type";
 import { useRouter } from "next/navigation";
@@ -12,11 +12,10 @@ export const useLoginController = () => {
     defaultValues: {
       email: "",
       pin: "",
-      role: undefined,
     },
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     try {
       const response = await fetch("/api/login", {
         method: "POST",
@@ -30,11 +29,7 @@ export const useLoginController = () => {
 
       if (response.ok) {
         console.log("Login successful:", result);
-        if (result.role === "customer") {
-          router.push(`/form/${result.id}`);
-        } else {
-          router.push("/dashboard");
-        }
+        router.push("/dashboard");
       } else {
         console.error("Login failed:", result.error);
         // You could set a form error here if you wanted

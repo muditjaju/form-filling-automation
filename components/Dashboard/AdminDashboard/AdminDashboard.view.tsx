@@ -1,47 +1,28 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
-import { Settings, Users, BarChart3, ShieldCheck, ArrowUpRight, ArrowDownRight, RefreshCw } from "lucide-react";
-import { AllLeadsTable } from "../AllLeadsTable";
-import { LeadOverlay } from "../LeadOverlay";
-import { Button } from "../ui/button";
+import { Plus, RefreshCw, ShieldCheck } from "lucide-react";
+import React from "react";
 
-interface AdminDashboardProps {
-  pin: string;
-  adminId: string;
-}
+import { CreateLeadOverlay } from "../CreateLeadOverlay/CreateLeadOverlay.view";
+import { AdminDashboardProps } from "./AdminDashboard.type";
+import { useAdminDashboard } from "./AdminDashboard.controller";
+import { LeadOverlay } from "@/components/LeadOverlay";
+import { AllLeadsTable } from "@/components/AllLeadsTable";
+import { Button } from "@/components/ui/button";
 
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({ pin, adminId }) => {
-  const [leads, setLeads] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedLead, setSelectedLead] = useState<any>(null);
-  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
-
-  const fetchLeads = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/customers?admin_id=${adminId}`);
-      const result = await response.json();
-      if (result.success) {
-        setLeads(result.data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch leads:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (adminId) {
-      fetchLeads();
-    }
-  }, [adminId]);
-
-  const handleLeadClick = (lead: any) => {
-    setSelectedLead(lead);
-    setIsOverlayOpen(true);
-  };
+export const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
+  const {
+    leads,
+    isLoading,
+    selectedLead,
+    isOverlayOpen,
+    isCreateOverlayOpen,
+    fetchLeads,
+    handleLeadClick,
+    handleCreateSuccess,
+    setIsOverlayOpen,
+    setIsCreateOverlayOpen,
+  } = useAdminDashboard(props);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -55,10 +36,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ pin, adminId }) 
           </p>
         </div>
         <div className="flex items-center space-x-3">
+            <Button
+                onClick={() => setIsCreateOverlayOpen(true)}
+                className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-200 dark:shadow-none transition-all active:scale-95 flex items-center gap-2"
+            >
+                <Plus className="h-5 w-5" />
+                <span>Create New Form</span>
+            </Button>
             <Button 
                 variant="outline" 
                 size="icon" 
-                onClick={fetchLeads} 
+                onClick={() => fetchLeads()} 
                 disabled={isLoading}
                 className="h-12 w-12 rounded-2xl border-zinc-200 dark:border-zinc-800"
             >
@@ -93,8 +81,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ pin, adminId }) 
         lead={selectedLead} 
         isOpen={isOverlayOpen} 
         onClose={() => setIsOverlayOpen(false)} 
+        onUpdate={() => fetchLeads(true)}
+      />
+
+      <CreateLeadOverlay 
+        isOpen={isCreateOverlayOpen}
+        onClose={() => setIsCreateOverlayOpen(false)}
+        adminEmail={props.adminEmail}
+        adminId={props.adminId}
+        onSuccess={handleCreateSuccess}
       />
     </div>
   );
 };
-

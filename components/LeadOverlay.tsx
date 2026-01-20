@@ -8,24 +8,18 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormBuilder } from "@/components/FormBuilder/FormBuilder.ui";
 import config from "@/components/FormBuilder/FormBuilder.config";
-import { Toast } from "@/components/Toast/Toast";
-import { PDFManager } from "./Dashboard/PDFManager";
-
-interface Lead {
-  id: string;
-  email: string;
-  status: string;
-  data?: any;
-  [key: string]: any;
-}
+import { Toast } from "@/components/ui/Toast/Toast";
+import { PDFManager } from "./Dashboard/PDFManager/PDFManager.view";
+import { CustomerDataTableType } from "@/types/CustomerDataTable.type";
 
 interface LeadOverlayProps {
-  lead: Lead | null;
+  lead: CustomerDataTableType | null;
   isOpen: boolean;
   onClose: () => void;
+  onUpdate?: () => void;
 }
 
-export const LeadOverlay: React.FC<LeadOverlayProps> = ({ lead, isOpen, onClose }) => {
+export const LeadOverlay: React.FC<LeadOverlayProps> = ({ lead, isOpen, onClose, onUpdate }) => {
   if (!lead) return null;
 
   const handleSubmit = async (data: any) => {
@@ -44,6 +38,9 @@ export const LeadOverlay: React.FC<LeadOverlayProps> = ({ lead, isOpen, onClose 
       }
 
       Toast.createNewToast({ message: 'Lead updated successfully!', type: 'success', id: loadingToast });
+      if (onUpdate) {
+        onUpdate();
+      }
     } catch (error) {
       console.error('Submission error:', error);
       Toast.createNewToast({ 

@@ -1,10 +1,11 @@
 "use client";
 
 import { LogOut } from "lucide-react";
-import { useLoginController } from "@/components/LoginComponent/LoginComponent.controller";
+import { useLogoutButton } from "./LogoutButton.controller";
+import { LogoutButtonProps } from "./LogoutButton.type";
 
-export function LogoutButton() {
-  const { logout } = useLoginController();
+export function LogoutButton(props: LogoutButtonProps) {
+  const { logout } = useLogoutButton();
 
   return (
     <button

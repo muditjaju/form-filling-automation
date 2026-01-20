@@ -60,30 +60,6 @@ export const LoginComponent = () => {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="role"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Role</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="h-11 bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700/50 transition-all">
-                      <SelectValue placeholder="Select your role" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="backdrop-blur-xl bg-white/90 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-700/50">
-                    <SelectItem value="admin" className="cursor-pointer">Admin</SelectItem>
-                    <SelectItem value="customer" className="cursor-pointer">Customer</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           <FormField
             control={form.control}
