@@ -38,10 +38,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      data: result.data
-    });
+    return NextResponse.json(result.data);
   } catch (error) {
     console.error("Form mapping API error:", error);
     return NextResponse.json(

@@ -14,6 +14,8 @@ export async function POST(req: NextRequest) {
       customerData: CustomerDataTableType 
     };
 
+    console.log('html string', htmlString)
+
     if (!htmlString || !customerData) {
       return NextResponse.json(
         { error: 'Missing htmlString or customerData' },
@@ -29,6 +31,7 @@ export async function POST(req: NextRequest) {
     }
 
     const prunedHtml = pruneHtml(htmlString);
+    console.log('pruned html', prunedHtml)
 
     const systemPrompt = `
       You are an expert field mapper. You will be given:

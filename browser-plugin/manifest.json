@@ -8,6 +8,10 @@
     "activeTab",
     "scripting"
   ],
+  "background": {
+    "service_worker": "background/index.js",
+    "type": "module"
+  },
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
