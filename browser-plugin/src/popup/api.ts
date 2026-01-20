@@ -1,5 +1,5 @@
 // export const API_BASE_URL = 'http://localhost:3000/api';
-export const API_BASE_URL = 'https://form-filling-automation.vercel.app/api';
+const API_BASE_URL = 'https://form-filling-automation.vercel.app/api';
 
 export interface Customer {
   id: string;
