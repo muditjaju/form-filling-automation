@@ -8,9 +8,10 @@ export default async function DashboardPage() {
   const cookieStore = await cookies();
   const role = cookieStore.get("ROLE")?.value;
   const pin = cookieStore.get("PIN")?.value;
+  const id = cookieStore.get("ID")?.value;
 
-  // Simple protection: if no role/pin, redirect back to login
-  if (!role || !pin) {
+  // Simple protection: if no role/pin/id, redirect back to login
+  if (!role || !pin || !id) {
     redirect("/");
   }
 
@@ -37,8 +38,8 @@ export default async function DashboardPage() {
         </header>
 
         <main className="bg-white dark:bg-zinc-900/50 rounded-[2.5rem] p-8 md:p-12 border border-zinc-200 dark:border-zinc-800 shadow-xl min-h-[600px] flex flex-col">
-          {isCustomer && <CustomerDashboard pin={pin} />}
-          {isAdmin && <AdminDashboard pin={pin} />}
+          {isCustomer && <CustomerDashboard pin={pin} id={id} />}
+          {isAdmin && <AdminDashboard pin={pin} adminId={id} />}
           {!isCustomer && !isAdmin && (
             <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
               <div className="h-20 w-20 rounded-full bg-red-100 dark:bg-red-900/20 text-red-600 flex items-center justify-center">

@@ -38,6 +38,23 @@ export const FetchAPIs = {
   },
 
   /**
+   * Fetches all customers for a specific admin.
+   */
+  async fetchAllLeadsForAdmin(adminId: string) {
+    const { data, error } = await supabase
+      .from("customer-data")
+      .select("*")
+      .eq("agent_id", adminId);
+
+    if (error) {
+      console.error("Error fetching all leads for admin:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  },
+
+  /**
    * Searches for a customer by email in the customer-data table.
    */
   async searchCustomerByEmail(email: string) {

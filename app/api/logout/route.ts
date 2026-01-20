@@ -6,6 +6,9 @@ export async function POST() {
   
   cookieStore.delete("ROLE");
   cookieStore.delete("PIN");
+  cookieStore.delete("EMAIL");
+  cookieStore.delete("ID");
+
 
   return NextResponse.json({ success: true, message: "Logged out successfully" });
 }

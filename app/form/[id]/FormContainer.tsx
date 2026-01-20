@@ -5,7 +5,7 @@ import { FormBuilder } from '@/components/FormBuilder/FormBuilder.ui';
 
 import toast from 'react-hot-toast';
 
-export default function FormContainer({ id, initialData }: { id: string; initialData: any }) {
+export default function FormContainer({ id, initialData, role }: { id: string; initialData: any; role?: string }) {
   
   const handleSubmit = async (data: any) => {
     const loadingToast = toast.loading('Saving changes...');
@@ -40,7 +40,7 @@ export default function FormContainer({ id, initialData }: { id: string; initial
             Please review and update your information below.
           </p>
         </div>
-        <FormBuilder config={config} initialData={initialData || {}} onSubmit={handleSubmit} />
+        <FormBuilder config={config} initialData={initialData || {}} onSubmit={handleSubmit} role={role} />
       </div>
     </div>
   );

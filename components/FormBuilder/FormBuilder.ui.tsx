@@ -10,9 +10,10 @@ interface FormBuilderProps {
   config: FormConfig;
   initialData?: FormData;
   onSubmit?: (data: FormData) => void;
+  role?: string;
 }
 
-export const FormBuilder: React.FC<FormBuilderProps> = ({ config, initialData, onSubmit }) => {
+export const FormBuilder: React.FC<FormBuilderProps> = ({ config, initialData, onSubmit, role }) => {
   const {
     formData,
     handleChange,
@@ -21,6 +22,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({ config, initialData, o
     removeMultipleItem,
     handleSubmit,
   } = useFormBuilder(config, initialData);
+
+  const isAdmin = role?.toLowerCase() === 'admin';
 
   const renderField = (field: FieldConfig, value: any, onChange: (val: any) => void) => {
     switch (field.type) {
@@ -64,7 +67,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({ config, initialData, o
         const data = handleSubmit(e);
         if (onSubmit) onSubmit(data);
       }} className="space-y-6">
-        {config.fields.map((field) => (
+        {config.fields.filter(f => !f.adminOnly || isAdmin).map((field) => (
           <div key={field.id} className="space-y-2">
             {field.type !== 'multiple' && (
               <>
@@ -93,7 +96,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({ config, initialData, o
                       </Button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {field.fields?.map((subField) => (
+                      {field.fields?.filter(f => !f.adminOnly || isAdmin).map((subField) => (
                         <div key={subField.id} className="space-y-1">
                           <Label htmlFor={`${field.id}-${index}-${subField.id}`} className="text-xs font-medium text-gray-500">
                             {subField.label}

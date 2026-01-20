@@ -13,6 +13,7 @@ export interface FieldConfig {
   options?: DropdownOption[]; // Only for dropdown
   fields?: FieldConfig[]; // Only for 'multiple'
   defaultValue?: any;
+  adminOnly?: boolean;
 }
 
 export interface FormConfig {

@@ -49,6 +49,12 @@ const config: FormConfig = {
       "placeholder": "Enter your age"
     },
     {
+      "id": "dataForXYZInsuranceCompany",
+      "label": "Data for Admin",
+      "type": "text",
+      "adminOnly": true
+    },
+    {
       "id": "addresses",
       "label": "Addresses",
       "type": "multiple",

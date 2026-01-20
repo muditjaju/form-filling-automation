@@ -107,6 +107,14 @@ export async function POST(request: Request) {
       path: "/",
     });
 
+    cookieStore.set("ID", admin.id, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      path: "/",
+    });
+
     return NextResponse.json({ success: true, message: "Logged in successfully", id: admin.id, role: role });
   } catch (error) {
     console.error("Login API error:", error);

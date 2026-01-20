@@ -10,11 +10,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ success: false, error: "admin_id is required" }, { status: 400 });
   }
 
-  // We only support IN_PROGRESS for now as per requirements
-  if (status !== "IN_PROGRESS") {
-    return NextResponse.json({ success: false, error: "Only IN_PROGRESS status is supported" }, { status: 400 });
+  if (status) {
+    if (status !== "IN_PROGRESS") {
+        return NextResponse.json({ success: false, error: "Only IN_PROGRESS status is supported for specific status fetch" }, { status: 400 });
+    }
+    const result = await FetchAPIs.fetchInProgressCustomers(adminId);
+    return NextResponse.json(result);
   }
 
-  const result = await FetchAPIs.fetchInProgressCustomers(adminId);
+  const result = await FetchAPIs.fetchAllLeadsForAdmin(adminId);
   return NextResponse.json(result);
 }
