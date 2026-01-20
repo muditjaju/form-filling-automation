@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormBuilder } from "@/components/FormBuilder/FormBuilder.ui";
 import config from "@/components/FormBuilder/FormBuilder.config";
 import { Toast } from "@/components/Toast/Toast";
+import { PDFManager } from "./Dashboard/PDFManager";
 
 interface Lead {
   id: string;
@@ -88,9 +89,7 @@ export const LeadOverlay: React.FC<LeadOverlayProps> = ({ lead, isOpen, onClose 
                 </TabsContent>
                 
                 <TabsContent value="submissions" className="mt-0">
-                    <div className="flex flex-col items-center justify-center h-64 text-zinc-400 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-2xl">
-                        <p>No submissions found yet.</p>
-                    </div>
+                    <PDFManager lead={lead} />
                 </TabsContent>
             </div>
           </Tabs>
