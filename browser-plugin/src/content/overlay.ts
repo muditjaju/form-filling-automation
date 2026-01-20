@@ -1,14 +1,103 @@
+// import { API_BASE_URL } from "@/popup/api";
+const API_BASE_URL = 'https://form-filling-automation.vercel.app/api';
+
 /**
  * Controller for the OutMarket Overlay
  * Handles data mapping and auto-filling web forms
  */
 class OverlayController {
   private customerData: any;
+  private rawCustomerData: any;
   private mapping: any;
   
   constructor(customerData: any, mappingData: any) {
+    this.rawCustomerData = customerData;
     this.customerData = customerData.data;
     this.mapping = mappingData;
+  }
+
+  /**
+   * Fills the page using AI by sending the DOM and customer data to the LLM
+   */
+  public async fillUsingAI() {
+    console.log('[OutMarket] Starting AI-based fill');
+    
+    // Show a loading state if possible, for now just an alert/log
+    const aiBtn = document.getElementById('om-ai-fill-btn') as HTMLButtonElement;
+    const originalText = aiBtn?.textContent;
+    if (aiBtn) {
+      aiBtn.disabled = true;
+      aiBtn.textContent = 'Analyzing...';
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/llm-based-mapper`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          htmlString: document.body.innerHTML,
+          customerData: this.rawCustomerData
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.statusText}`);
+      }
+
+      const mapping = await response.json();
+      console.log('[OutMarket] AI Mapping result:', mapping);
+
+      let filledCount = 0;
+      for (const [id, value] of Object.entries(mapping)) {
+        const success = this.setElementValue(id, String(value));
+        if (success) filledCount++;
+      }
+
+      alert(`AI successfully filled ${filledCount} fields!`);
+    } catch (error) {
+      console.error('[OutMarket] AI fill failed:', error);
+      alert('Failed to fill using AI. Please check the console for errors.');
+    } finally {
+      if (aiBtn) {
+        aiBtn.disabled = false;
+        aiBtn.textContent = originalText || 'Fill Using AI';
+      }
+    }
+  }
+
+  /**
+   * Helper to set a value on an HTML element and trigger events
+   */
+  private setElementValue(id: string, value: string): boolean {
+    const element = document.getElementById(id);
+    if (!element || !(element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement)) {
+      return false;
+    }
+
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
+    const nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value")?.set;
+    const nativeSelectValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value")?.set;
+
+    try {
+      if (element instanceof HTMLInputElement && nativeInputValueSetter) {
+        nativeInputValueSetter.call(element, value);
+      } else if (element instanceof HTMLTextAreaElement && nativeTextAreaValueSetter) {
+        nativeTextAreaValueSetter.call(element, value);
+      } else if (element instanceof HTMLSelectElement && nativeSelectValueSetter) {
+        nativeSelectValueSetter.call(element, value);
+      } else {
+        element.value = value;
+      }
+      
+      element.dispatchEvent(new Event('input', { bubbles: true }));
+      element.dispatchEvent(new Event('change', { bubbles: true }));
+      return true;
+    } catch (e) {
+      console.error(`[OutMarket] Failed to set value for ${id}:`, e);
+      return false;
+    }
   }
 
   /**
@@ -16,34 +105,15 @@ class OverlayController {
    */
   public async autoFill() {
     console.log('[OutMarket] Starting auto-fill');
-    console.log('[OutMarket] Source Data:', JSON.stringify(this.customerData, null, 2));
     
     const mappings = this.mapping.mappings;
     let filledCount = 0;
 
     for (const [destId, sourceKeys] of Object.entries(mappings)) {
-      console.log(`[OutMarket] Processing destination ID: "${destId}"`);
-      const element = document.getElementById(destId);
-      
-      if (!element) {
-        console.warn(`[OutMarket] Element with ID "${destId}" NOT FOUND on page.`);
-        continue;
-      }
-
-      if (!(element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement)) {
-        console.warn(`[OutMarket] Element "${destId}" is found but it is NOT an input/textarea/select.`);
-        continue;
-      }
-
       let concatenatedValue = '';
       
       if (Array.isArray(sourceKeys)) {
-        const values = sourceKeys.map(key => {
-          const val = this.getValueByPath(this.customerData, key);
-          console.log(`[OutMarket]   Source key "${key}" -> value: "${val}"`);
-          return val;
-        });
-
+        const values = sourceKeys.map(key => this.getValueByPath(this.customerData, key));
         concatenatedValue = values
           .filter(val => val !== undefined && val !== null && val !== '')
           .join(' ')
@@ -51,41 +121,15 @@ class OverlayController {
       }
 
       if (concatenatedValue) {
-        console.log(`[OutMarket] SUCCESS: Filling "${destId}" with "${concatenatedValue}"`);
-        
-        // Use native setter if available to bypass React's overridden setter
-        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
-        const nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value")?.set;
-        const nativeSelectValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value")?.set;
-
-        try {
-          if (element instanceof HTMLInputElement && nativeInputValueSetter) {
-            nativeInputValueSetter.call(element, concatenatedValue);
-          } else if (element instanceof HTMLTextAreaElement && nativeTextAreaValueSetter) {
-            nativeTextAreaValueSetter.call(element, concatenatedValue);
-          } else if (element instanceof HTMLSelectElement && nativeSelectValueSetter) {
-            nativeSelectValueSetter.call(element, concatenatedValue);
-          } else {
-            element.value = concatenatedValue;
-          }
-        } catch (e) {
-          console.error(`[OutMarket] Failed to set value via native setter for ${destId}:`, e);
-          element.value = concatenatedValue;
-        }
-        
-        // Trigger events to notify page scripts (React, Vue, etc.)
-        element.dispatchEvent(new Event('input', { bubbles: true }));
-        element.dispatchEvent(new Event('change', { bubbles: true }));
-        filledCount++;
-      } else {
-        console.log(`[OutMarket] SKIP: No value found for "${destId}"`);
+        const success = this.setElementValue(destId, concatenatedValue);
+        if (success) filledCount++;
       }
     }
     
     if (filledCount > 0) {
       alert(`Successfully filled ${filledCount} fields!`);
     } else {
-      alert('Could not find any data to fill. Please check the console for mapping details.');
+      alert('Could not find any data to fill.');
     }
   }
 
@@ -119,7 +163,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   }
 });
 
-const API_BASE_URL = 'http://localhost:3000/api';
+
 
 async function createOverlay(data: any) {
   const existing = document.getElementById('outmarket-overlay');
@@ -150,7 +194,10 @@ async function createOverlay(data: any) {
     <div class="om-header" id="om-drag-handle">
       <div class="om-header-left">
         <span>Customer Data</span>
-        ${showFillBtn ? '<button id="om-fill-btn">Fill Automatically</button>' : ''}
+        ${mappingData ? 
+          '<button id="om-fill-btn">Fill Automatically</button>' : 
+          '<button id="om-ai-fill-btn">Fill Using AI</button>'
+        }
       </div>
       <button id="om-close-btn">✕</button>
     </div>
@@ -221,6 +268,14 @@ async function createOverlay(data: any) {
   if (fillBtn) {
     fillBtn.addEventListener('click', () => {
       controller.autoFill();
+    });
+  }
+
+  // AI Fill Logic
+  const aiFillBtn = overlay.querySelector('#om-ai-fill-btn');
+  if (aiFillBtn) {
+    aiFillBtn.addEventListener('click', () => {
+      controller.fillUsingAI();
     });
   }
 
