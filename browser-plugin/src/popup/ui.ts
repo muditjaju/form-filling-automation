@@ -33,7 +33,7 @@ export const ui = {
       const div = document.createElement('div');
       div.className = 'customer-item';
       div.innerHTML = `
-        <div class="customer-name">${customer.name || 'N/A'}</div>
+        <div class="customer-name">${customer.id || 'N/A'}</div>
         <div class="customer-email">${customer.email}</div>
       `;
       div.onclick = () => onSelect(customer);

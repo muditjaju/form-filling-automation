@@ -9,20 +9,14 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Link, Check } from "lucide-react";
-import { Toast } from "@/components/Toast/Toast";
+import { Toast } from "@/components/ui/Toast/Toast";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-
-interface Lead {
-  id: string;
-  email: string;
-  status: string;
-  [key: string]: any;
-}
+import { CustomerDataTableType } from "@/types/CustomerDataTable.type";
 
 interface AllLeadsTableProps {
-  leads: Lead[];
-  onLeadClick: (lead: Lead) => void;
+  leads: CustomerDataTableType[];
+  onLeadClick: (lead: CustomerDataTableType) => void;
 }
 
 export const AllLeadsTable: React.FC<AllLeadsTableProps> = ({ leads, onLeadClick }) => {

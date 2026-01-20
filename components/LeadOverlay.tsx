@@ -8,19 +8,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormBuilder } from "@/components/FormBuilder/FormBuilder.ui";
 import config from "@/components/FormBuilder/FormBuilder.config";
-import { Toast } from "@/components/Toast/Toast";
+import { Toast } from "@/components/ui/Toast/Toast";
 import { PDFManager } from "./Dashboard/PDFManager";
-
-interface Lead {
-  id: string;
-  email: string;
-  status: string;
-  data?: any;
-  [key: string]: any;
-}
+import { CustomerDataTableType } from "@/types/CustomerDataTable.type";
 
 interface LeadOverlayProps {
-  lead: Lead | null;
+  lead: CustomerDataTableType | null;
   isOpen: boolean;
   onClose: () => void;
   onUpdate?: () => void;

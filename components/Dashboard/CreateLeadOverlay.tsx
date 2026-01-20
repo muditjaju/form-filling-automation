@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Toast } from "@/components/Toast/Toast";
+import { Toast } from "@/components/ui/Toast/Toast";
 import { Loader2, Mail, Lock, ShieldCheck, UserPlus } from "lucide-react";
 
 interface CreateLeadOverlayProps {

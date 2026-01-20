@@ -1,23 +1,23 @@
 'use client';
 
+import { Plus, RefreshCw, ShieldCheck } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { Settings, Users, BarChart3, ShieldCheck, ArrowUpRight, ArrowDownRight, RefreshCw } from "lucide-react";
 import { AllLeadsTable } from "../AllLeadsTable";
 import { LeadOverlay } from "../LeadOverlay";
-import { CreateLeadOverlay } from "./CreateLeadOverlay";
 import { Button } from "../ui/button";
-import { Plus } from "lucide-react";
+import { CreateLeadOverlay } from "./CreateLeadOverlay";
+import { FormData } from "../FormBuilder/FormBuilder.type";
+import { CustomerDataTableType } from "@/types/CustomerDataTable.type";
 
 interface AdminDashboardProps {
-  pin: string;
   adminId: string;
   adminEmail: string;
 }
 
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({ pin, adminId, adminEmail }) => {
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, adminEmail }) => {
   const [leads, setLeads] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [selectedLead, setSelectedLead] = useState<CustomerDataTableType | null>(null);
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const [isCreateOverlayOpen, setIsCreateOverlayOpen] = useState(false);
 
@@ -31,7 +31,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ pin, adminId, ad
         
         // Update selected lead if it exists to keep overlay data in sync
         if (selectedLead) {
-          const updatedLead = result.data.find((l: any) => l.id === selectedLead.id);
+          const updatedLead = result.data.find((l: CustomerDataTableType) => l.id === selectedLead.id);
           if (updatedLead) {
             setSelectedLead(updatedLead);
           }
@@ -50,12 +50,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ pin, adminId, ad
     }
   }, [adminId]);
 
-  const handleLeadClick = (lead: any) => {
+  const handleLeadClick = (lead: CustomerDataTableType) => {
     setSelectedLead(lead);
     setIsOverlayOpen(true);
   };
 
-  const handleCreateSuccess = (newLead: any) => {
+  const handleCreateSuccess = (newLead: CustomerDataTableType) => {
     fetchLeads(true);
     setSelectedLead(newLead);
     setIsOverlayOpen(true);

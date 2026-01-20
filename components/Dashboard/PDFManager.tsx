@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
-import { FileText, ChevronRight, Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { pdfTemplates } from '@/lib/pdf-mappings';
+import { ChevronRight, FileText, Search } from 'lucide-react';
+import React, { useState } from 'react';
 import { PDFOverlay } from './PDFOverlay';
+import { CustomerDataTableType } from '@/types/CustomerDataTable.type';
 
 interface PDFManagerProps {
-  lead: any;
+  lead: CustomerDataTableType;
 }
 
 export const PDFManager: React.FC<PDFManagerProps> = ({ lead }) => {

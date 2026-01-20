@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Download, Loader2 } from 'lucide-react';
 import { fillPdf } from '@/lib/pdf-utils';
 import { getMappingForPdf } from '@/lib/pdf-mappings';
+import { FormData } from '../FormBuilder/FormBuilder.type';
 
 interface PDFOverlayProps {
   isOpen: boolean;
@@ -20,7 +21,7 @@ interface PDFOverlayProps {
     name: string;
     fileName: string;
   } | null;
-  leadData: any;
+  leadData: FormData;
 }
 
 export const PDFOverlay: React.FC<PDFOverlayProps> = ({ isOpen, onClose, pdfTemplate, leadData }) => {
